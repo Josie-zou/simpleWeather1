@@ -1,6 +1,7 @@
 package com.example.simpleweather1;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -20,9 +21,14 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.xml.sax.DocumentHandler;
 
+import com.weather.citydb.DatabaseManager;
+
 import android.support.v7.app.ActionBarActivity;
+import android.R.integer;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -30,30 +36,62 @@ import android.provider.DocumentsContract.Document;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity {
 
 	private TextView temp;
 	private TextView status;
 	private TextView direction;
 	private Button city;
 	private Button district;
+	private Button add;
+	private DatabaseManager databaseManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.activity_main);
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.main_title);
+		
+		add = (Button) findViewById(R.id.add);
+		add.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent intent = new Intent(MainActivity.this, Addcity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+				
+			}
+		});
 		temp = (TextView) findViewById(R.id.temp);
 		status = (TextView) findViewById(R.id.status);
 		direction = (TextView) findViewById(R.id.direction);
 		city = (Button) findViewById(R.id.province);
 		district = (Button) findViewById(R.id.city);
 		closeStrictMode();
+		databaseManager = new DatabaseManager(this);
+		try {
+			databaseManager.open();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		databaseManager.closedatabase();
+		
 		
 		direction.setText(getweather("Ã¯Ãû").toString());
 	}
+	
+	
+	
 	
 	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 	@SuppressLint("NewApi")
